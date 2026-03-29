@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Recorder</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.1692.0/aws-sdk.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --accent: #ff4444;
+      --accent-glow: rgba(255, 68, 68, 0.3);
+      --success: #4caf50;
+      --info: #2196f3;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 40px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    /* Record Button */
+    .rec-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 30px;
+    }
+
+    .rec-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .rec-btn .inner {
+      width: 50px;
+      height: 50px;
+      background: var(--accent);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .rec-btn.recording {
+      border-color: var(--accent);
+      box-shadow: 0 0 30px var(--accent-glow);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .rec-btn.recording .inner {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+      50% { box-shadow: 0 0 40px var(--accent-glow); }
+    }
+
+    /* Timer */
+    .timer {
+      font-size: 2rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 300;
+      margin-bottom: 30px;
+      color: var(--text-dim);
+      height: 2.4rem;
+    }
+
+    .timer.active { color: var(--accent); }
+
+    /* Status */
+    .status {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      min-height: 1.4em;
+      margin-bottom: 20px;
+      transition: color 0.3s;
+    }
+
+    .status.uploading { color: var(--info); }
+    .status.success { color: var(--success); }
+    .status.error { color: var(--accent); }
+
+    /* History */
+    .history {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .history h2 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .history-list {
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .history-list li {
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-list .time { color: var(--text-dim); font-size: 0.75rem; }
+    .history-list .check { color: var(--success); }
+
+    /* Config Panel */
+    .config-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .config-panel {
+      display: none;
+      position: fixed;
+      top: 50px;
+      right: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      width: 320px;
+      z-index: 10;
+    }
+
+    .config-panel.open { display: block; }
+
+    .config-panel label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+
+    .config-panel label:first-child { margin-top: 0; }
+
+    .config-panel input {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: monospace;
+    }
+
+    .config-panel .save-btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 8px;
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .config-panel .save-btn:hover { opacity: 0.9; }
+    .config-panel .note {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="config-toggle" onclick="toggleConfig()">⚙ 設定</button>
+  <div class="config-panel" id="configPanel">
+    <label>R2 Bucket Name</label>
+    <input type="text" id="cfgBucket" placeholder="voice-recordings">
+    <label>Cloudflare Account ID</label>
+    <input type="text" id="cfgAccountId" placeholder="1a2b3c4d...">
+    <label>R2 Access Key ID</label>
+    <input type="text" id="cfgAccessKey" placeholder="R2のAPIトークンから取得">
+    <label>R2 Secret Access Key</label>
+    <input type="password" id="cfgSecretKey" placeholder="********">
+    <label>保存先フォルダ (任意)</label>
+    <input type="text" id="cfgPrefix" placeholder="recordings/">
+    <button class="save-btn" onclick="saveConfig()">保存</button>
+    <p class="note">※ 認証情報はブラウザの localStorage に保存されます。個人利用専用です。</p>
+  </div>
+
+  <div class="container">
+    <h1>VOICE RECORDER</h1>
+
+    <div class="timer" id="timer">00:00</div>
+
+    <button class="rec-btn" id="recBtn" onclick="toggleRecording()">
+      <div class="inner"></div>
+    </button>
+
+    <div class="status" id="status">タップして録音開始</div>
+
+    <div class="history" id="historySection" style="display:none">
+      <h2>アップロード履歴</h2>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    // ── State ──
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let isRecording = false;
+    let timerInterval = null;
+    let startTime = 0;
+
+    const recBtn = document.getElementById('recBtn');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status');
+    const historyList = document.getElementById('historyList');
+    const historySection = document.getElementById('historySection');
+
+    // ── Config ──
+    function loadConfig() {
+      return {
+        bucket: localStorage.getItem('r2_bucket') || '',
+        accountId: localStorage.getItem('r2_account_id') || '',
+        accessKey: localStorage.getItem('r2_access_key') || '',
+        secretKey: localStorage.getItem('r2_secret_key') || '',
+        prefix: localStorage.getItem('r2_prefix') || 'recordings/',
+      };
+    }
+
+    function saveConfig() {
+      localStorage.setItem('r2_bucket', document.getElementById('cfgBucket').value.trim());
+      localStorage.setItem('r2_account_id', document.getElementById('cfgAccountId').value.trim());
+      localStorage.setItem('r2_access_key', document.getElementById('cfgAccessKey').value.trim());
+      localStorage.setItem('r2_secret_key', document.getElementById('cfgSecretKey').value.trim());
+      localStorage.setItem('r2_prefix', document.getElementById('cfgPrefix').value.trim());
+      document.getElementById('configPanel').classList.remove('open');
+      setStatus('設定を保存しました', 'success');
+    }
+
+    function populateConfigUI() {
+      const cfg = loadConfig();
+      document.getElementById('cfgBucket').value = cfg.bucket;
+      document.getElementById('cfgAccountId').value = cfg.accountId;
+      document.getElementById('cfgAccessKey').value = cfg.accessKey;
+      document.getElementById('cfgSecretKey').value = cfg.secretKey;
+      document.getElementById('cfgPrefix').value = cfg.prefix;
+    }
+
+    function toggleConfig() {
+      const panel = document.getElementById('configPanel');
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) populateConfigUI();
+    }
+
+    // ── Status ──
+    function setStatus(msg, type = '') {
+      statusEl.textContent = msg;
+      statusEl.className = 'status ' + type;
+    }
+
+    // ── Timer ──
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+    }
+
+    // ── Recording ──
+    async function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        await startRecording();
+      }
+    }
+
+    async function startRecording() {
+      const cfg = loadConfig();
+      if (!cfg.bucket || !cfg.accountId || !cfg.accessKey || !cfg.secretKey) {
+        setStatus('⚙ 設定からR2情報を入力してください', 'error');
+        document.getElementById('configPanel').classList.add('open');
+        populateConfigUI();
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Prefer webm/opus, fallback to webm, then whatever is available
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus'
+          : MediaRecorder.isTypeSupported('audio/webm')
+            ? 'audio/webm'
+            : '';
+
+        mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+          uploadToS3(blob);
+        };
+
+        mediaRecorder.start(1000); // collect data every second
+        isRecording = true;
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 200);
+        timerEl.classList.add('active');
+        recBtn.classList.add('recording');
+        setStatus('録音中...', 'uploading');
+      } catch (err) {
+        setStatus('マイクへのアクセスが拒否されました', 'error');
+        console.error(err);
+      }
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      isRecording = false;
+      clearInterval(timerInterval);
+      timerEl.classList.remove('active');
+      recBtn.classList.remove('recording');
+      setStatus('アップロード中...', 'uploading');
+    }
+
+    // ── S3 Upload ──
+    async function uploadToS3(blob) {
+      const cfg = loadConfig();
+
+      const s3 = new AWS.S3({
+        endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
+        accessKeyId: cfg.accessKey,
+        secretAccessKey: cfg.secretKey,
+        region: 'auto',
+        signatureVersion: 'v4',
+        s3ForcePathStyle: true,
+      });
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10);
+      const timeStr = now.toISOString().slice(11, 19).replace(/:/g, '');
+      const ext = blob.type.includes('webm') ? 'webm' : blob.type.includes('ogg') ? 'ogg' : 'bin';
+      const key = `${cfg.prefix}${dateStr}/${timeStr}.${ext}`;
+
+      const params = {
+        Bucket: cfg.bucket,
+        Key: key,
+        Body: blob,
+        ContentType: blob.type,
+      };
+
+      try {
+        await s3.upload(params).promise();
+        setStatus('✓ アップロード完了', 'success');
+        addHistory(key, blob.size);
+      } catch (err) {
+        console.error('Upload error:', err);
+        setStatus(`アップロード失敗: ${err.message}`, 'error');
+      }
+
+      // Reset timer after a short delay
+      setTimeout(() => {
+        timerEl.textContent = '00:00';
+        setTimeout(() => setStatus('タップして録音開始'), 3000);
+      }, 500);
+    }
+
+    // ── History ──
+    function addHistory(key, size) {
+      historySection.style.display = 'block';
+      const li = document.createElement('li');
+      const sizeKB = (size / 1024).toFixed(1);
+      const fileName = key.split('/').pop();
+      li.innerHTML = `
+        <span><span class="check">✓</span> ${fileName} <span class="time">(${sizeKB} KB)</span></span>
+        <span class="time">${new Date().toLocaleTimeString('ja-JP')}</span>
+      `;
+      historyList.prepend(li);
+    }
+
+    // ── Init ──
+    populateConfigUI();
+  </script>
+</body>
+</html>
