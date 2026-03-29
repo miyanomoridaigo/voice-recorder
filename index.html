@@ -28,23 +28,51 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       padding: 20px;
     }
 
     .container {
       width: 100%;
-      max-width: 400px;
+      max-width: 480px;
       text-align: center;
+      padding-top: 40px;
     }
 
     h1 {
       font-size: 1.2rem;
       font-weight: 500;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       color: var(--text-dim);
       letter-spacing: 0.05em;
     }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     /* Record Button */
     .rec-btn {
@@ -54,12 +82,11 @@
       border: 3px solid var(--border);
       background: var(--surface);
       cursor: pointer;
-      position: relative;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 30px;
+      margin: 0 auto 24px;
     }
 
     .rec-btn:hover {
@@ -92,24 +119,22 @@
       50% { box-shadow: 0 0 40px var(--accent-glow); }
     }
 
-    /* Timer */
     .timer {
       font-size: 2rem;
       font-variant-numeric: tabular-nums;
       font-weight: 300;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       color: var(--text-dim);
       height: 2.4rem;
     }
 
     .timer.active { color: var(--accent); }
 
-    /* Status */
     .status {
       font-size: 0.85rem;
       color: var(--text-dim);
       min-height: 1.4em;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       transition: color 0.3s;
     }
 
@@ -117,40 +142,130 @@
     .status.success { color: var(--success); }
     .status.error { color: var(--accent); }
 
-    /* History */
-    .history {
-      margin-top: 30px;
-      text-align: left;
-    }
-
-    .history h2 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      margin-bottom: 10px;
-    }
-
-    .history-list {
-      list-style: none;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .history-list li {
-      font-size: 0.85rem;
-      padding: 8px 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      margin-bottom: 6px;
+    /* File Browser */
+    .browser-toolbar {
       display: flex;
-      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 16px;
       align-items: center;
     }
 
-    .history-list .time { color: var(--text-dim); font-size: 0.75rem; }
-    .history-list .check { color: var(--success); }
+    .refresh-btn {
+      padding: 6px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .refresh-btn:hover { border-color: var(--info); color: var(--info); }
+
+    .browser-status {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      flex: 1;
+      text-align: right;
+    }
+
+    /* Date Group */
+    .date-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .date-header {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      padding-left: 4px;
+    }
+
+    /* File Item */
+    .file-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      transition: border-color 0.2s;
+    }
+
+    .file-item:hover { border-color: #444; }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .file-name {
+      font-size: 0.85rem;
+      flex: 1;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover { border-color: var(--info); color: var(--info); }
+    .icon-btn.playing { border-color: var(--accent); color: var(--accent); }
+
+    /* Audio player row */
+    .audio-row {
+      margin-top: 8px;
+      display: none;
+    }
+
+    .audio-row.open { display: block; }
+
+    .audio-row audio {
+      width: 100%;
+      height: 36px;
+      border-radius: 6px;
+    }
+
+    .empty-msg {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      padding: 40px 0;
+    }
+
+    .loading-spinner {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      padding: 40px 0;
+    }
 
     /* Config Panel */
     .config-toggle {
@@ -164,6 +279,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.8rem;
+      z-index: 20;
     }
 
     .config-panel {
@@ -176,7 +292,7 @@
       border-radius: 10px;
       padding: 20px;
       width: 320px;
-      z-index: 10;
+      z-index: 20;
     }
 
     .config-panel.open { display: block; }
@@ -246,17 +362,31 @@
   <div class="container">
     <h1>VOICE RECORDER</h1>
 
-    <div class="timer" id="timer">00:00</div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('record')">録音</button>
+      <button class="tab" onclick="switchTab('files')">ファイル一覧</button>
+    </div>
 
-    <button class="rec-btn" id="recBtn" onclick="toggleRecording()">
-      <div class="inner"></div>
-    </button>
+    <!-- Record Tab -->
+    <div class="tab-content active" id="tabRecord">
+      <div class="timer" id="timer">00:00</div>
 
-    <div class="status" id="status">タップして録音開始</div>
+      <button class="rec-btn" id="recBtn" onclick="toggleRecording()">
+        <div class="inner"></div>
+      </button>
 
-    <div class="history" id="historySection" style="display:none">
-      <h2>アップロード履歴</h2>
-      <ul class="history-list" id="historyList"></ul>
+      <div class="status" id="status">タップして録音開始</div>
+    </div>
+
+    <!-- Files Tab -->
+    <div class="tab-content" id="tabFiles">
+      <div class="browser-toolbar">
+        <button class="refresh-btn" onclick="loadFileList()">↻ 更新</button>
+        <span class="browser-status" id="browserStatus"></span>
+      </div>
+      <div id="fileListContainer">
+        <div class="empty-msg">「更新」を押してファイル一覧を取得</div>
+      </div>
     </div>
   </div>
 
@@ -267,12 +397,22 @@
     let isRecording = false;
     let timerInterval = null;
     let startTime = 0;
+    let currentAudio = null;
+    let currentPlayingBtn = null;
 
     const recBtn = document.getElementById('recBtn');
     const timerEl = document.getElementById('timer');
     const statusEl = document.getElementById('status');
-    const historyList = document.getElementById('historyList');
-    const historySection = document.getElementById('historySection');
+
+    // ── Tabs ──
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (tab === 'record' && i === 0) || (tab === 'files' && i === 1));
+      });
+      document.getElementById('tabRecord').classList.toggle('active', tab === 'record');
+      document.getElementById('tabFiles').classList.toggle('active', tab === 'files');
+      if (tab === 'files') loadFileList();
+    }
 
     // ── Config ──
     function loadConfig() {
@@ -310,6 +450,18 @@
       if (panel.classList.contains('open')) populateConfigUI();
     }
 
+    function getS3Client() {
+      const cfg = loadConfig();
+      return new AWS.S3({
+        endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
+        accessKeyId: cfg.accessKey,
+        secretAccessKey: cfg.secretKey,
+        region: 'auto',
+        signatureVersion: 'v4',
+        s3ForcePathStyle: true,
+      });
+    }
+
     // ── Status ──
     function setStatus(msg, type = '') {
       statusEl.textContent = msg;
@@ -344,8 +496,6 @@
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-        // Prefer webm/opus, fallback to webm, then whatever is available
         const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
           ? 'audio/webm;codecs=opus'
           : MediaRecorder.isTypeSupported('audio/webm')
@@ -362,10 +512,10 @@
         mediaRecorder.onstop = () => {
           stream.getTracks().forEach(t => t.stop());
           const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-          uploadToS3(blob);
+          uploadToR2(blob);
         };
 
-        mediaRecorder.start(1000); // collect data every second
+        mediaRecorder.start(1000);
         isRecording = true;
         startTime = Date.now();
         timerInterval = setInterval(updateTimer, 200);
@@ -389,58 +539,196 @@
       setStatus('アップロード中...', 'uploading');
     }
 
-    // ── S3 Upload ──
-    async function uploadToS3(blob) {
+    // ── R2 Upload ──
+    async function uploadToR2(blob) {
       const cfg = loadConfig();
-
-      const s3 = new AWS.S3({
-        endpoint: `https://${cfg.accountId}.r2.cloudflarestorage.com`,
-        accessKeyId: cfg.accessKey,
-        secretAccessKey: cfg.secretKey,
-        region: 'auto',
-        signatureVersion: 'v4',
-        s3ForcePathStyle: true,
-      });
+      const s3 = getS3Client();
       const now = new Date();
       const dateStr = now.toISOString().slice(0, 10);
       const timeStr = now.toISOString().slice(11, 19).replace(/:/g, '');
       const ext = blob.type.includes('webm') ? 'webm' : blob.type.includes('ogg') ? 'ogg' : 'bin';
       const key = `${cfg.prefix}${dateStr}/${timeStr}.${ext}`;
 
-      const params = {
-        Bucket: cfg.bucket,
-        Key: key,
-        Body: blob,
-        ContentType: blob.type,
-      };
-
       try {
-        await s3.upload(params).promise();
+        await s3.upload({ Bucket: cfg.bucket, Key: key, Body: blob, ContentType: blob.type }).promise();
         setStatus('✓ アップロード完了', 'success');
-        addHistory(key, blob.size);
       } catch (err) {
         console.error('Upload error:', err);
         setStatus(`アップロード失敗: ${err.message}`, 'error');
       }
 
-      // Reset timer after a short delay
       setTimeout(() => {
         timerEl.textContent = '00:00';
         setTimeout(() => setStatus('タップして録音開始'), 3000);
       }, 500);
     }
 
-    // ── History ──
-    function addHistory(key, size) {
-      historySection.style.display = 'block';
-      const li = document.createElement('li');
-      const sizeKB = (size / 1024).toFixed(1);
-      const fileName = key.split('/').pop();
-      li.innerHTML = `
-        <span><span class="check">✓</span> ${fileName} <span class="time">(${sizeKB} KB)</span></span>
-        <span class="time">${new Date().toLocaleTimeString('ja-JP')}</span>
-      `;
-      historyList.prepend(li);
+    // ── File List ──
+    async function loadFileList() {
+      const cfg = loadConfig();
+      if (!cfg.bucket || !cfg.accountId || !cfg.accessKey || !cfg.secretKey) {
+        document.getElementById('fileListContainer').innerHTML =
+          '<div class="empty-msg">⚙ 設定からR2情報を入力してください</div>';
+        return;
+      }
+
+      document.getElementById('fileListContainer').innerHTML =
+        '<div class="loading-spinner">読み込み中...</div>';
+      document.getElementById('browserStatus').textContent = '';
+
+      const s3 = getS3Client();
+
+      try {
+        const data = await s3.listObjectsV2({
+          Bucket: cfg.bucket,
+          Prefix: cfg.prefix,
+          MaxKeys: 500,
+        }).promise();
+
+        const files = (data.Contents || [])
+          .filter(f => f.Size > 0)
+          .sort((a, b) => new Date(b.LastModified) - new Date(a.LastModified));
+
+        if (files.length === 0) {
+          document.getElementById('fileListContainer').innerHTML =
+            '<div class="empty-msg">録音ファイルがありません</div>';
+          document.getElementById('browserStatus').textContent = '0 件';
+          return;
+        }
+
+        // Group by date
+        const groups = {};
+        files.forEach(f => {
+          const date = new Date(f.LastModified).toLocaleDateString('ja-JP', {
+            year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
+          });
+          if (!groups[date]) groups[date] = [];
+          groups[date].push(f);
+        });
+
+        let html = '';
+        for (const [date, items] of Object.entries(groups)) {
+          html += `<div class="date-group"><div class="date-header">${date}</div>`;
+          items.forEach((f, i) => {
+            const fileName = f.Key.split('/').pop();
+            const sizeKB = (f.Size / 1024).toFixed(1);
+            const time = new Date(f.LastModified).toLocaleTimeString('ja-JP', {
+              hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            const itemId = `file-${date}-${i}`;
+            html += `
+              <div class="file-item">
+                <div class="file-row">
+                  <span class="file-name" title="${f.Key}">${time} — ${fileName}</span>
+                  <span class="file-size">${sizeKB} KB</span>
+                  <div class="file-actions">
+                    <button class="icon-btn" id="play-${itemId}" onclick="togglePlay('${f.Key}', '${itemId}')" title="再生">▶</button>
+                    <button class="icon-btn" onclick="downloadFile('${f.Key}')" title="ダウンロード">↓</button>
+                  </div>
+                </div>
+                <div class="audio-row" id="audio-${itemId}"></div>
+              </div>`;
+          });
+          html += '</div>';
+        }
+
+        document.getElementById('fileListContainer').innerHTML = html;
+        document.getElementById('browserStatus').textContent = `${files.length} 件`;
+      } catch (err) {
+        console.error('List error:', err);
+        document.getElementById('fileListContainer').innerHTML =
+          `<div class="empty-msg" style="color:var(--accent)">取得失敗: ${err.message}</div>`;
+      }
+    }
+
+    // ── Play ──
+    async function togglePlay(key, itemId) {
+      const audioRow = document.getElementById(`audio-${itemId}`);
+      const playBtn = document.getElementById(`play-${itemId}`);
+
+      // If already playing this one, stop
+      if (currentAudio && currentPlayingBtn === playBtn) {
+        currentAudio.pause();
+        currentAudio = null;
+        currentPlayingBtn.classList.remove('playing');
+        currentPlayingBtn.textContent = '▶';
+        currentPlayingBtn = null;
+        audioRow.classList.remove('open');
+        audioRow.innerHTML = '';
+        return;
+      }
+
+      // Stop any other playing
+      if (currentAudio) {
+        currentAudio.pause();
+        currentPlayingBtn.classList.remove('playing');
+        currentPlayingBtn.textContent = '▶';
+        const prevRow = currentPlayingBtn.closest('.file-item').querySelector('.audio-row');
+        prevRow.classList.remove('open');
+        prevRow.innerHTML = '';
+        currentAudio = null;
+        currentPlayingBtn = null;
+      }
+
+      playBtn.textContent = '…';
+
+      try {
+        const cfg = loadConfig();
+        const s3 = getS3Client();
+        const data = await s3.getObject({ Bucket: cfg.bucket, Key: key }).promise();
+        const blob = new Blob([data.Body], { type: data.ContentType || 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = url;
+        audio.autoplay = true;
+
+        audioRow.innerHTML = '';
+        audioRow.appendChild(audio);
+        audioRow.classList.add('open');
+
+        playBtn.textContent = '■';
+        playBtn.classList.add('playing');
+        currentAudio = audio;
+        currentPlayingBtn = playBtn;
+
+        audio.onended = () => {
+          playBtn.classList.remove('playing');
+          playBtn.textContent = '▶';
+          audioRow.classList.remove('open');
+          audioRow.innerHTML = '';
+          URL.revokeObjectURL(url);
+          currentAudio = null;
+          currentPlayingBtn = null;
+        };
+      } catch (err) {
+        console.error('Play error:', err);
+        playBtn.textContent = '▶';
+        alert(`再生失敗: ${err.message}`);
+      }
+    }
+
+    // ── Download ──
+    async function downloadFile(key) {
+      try {
+        const cfg = loadConfig();
+        const s3 = getS3Client();
+        const data = await s3.getObject({ Bucket: cfg.bucket, Key: key }).promise();
+        const blob = new Blob([data.Body], { type: data.ContentType || 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = key.split('/').pop();
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (err) {
+        console.error('Download error:', err);
+        alert(`ダウンロード失敗: ${err.message}`);
+      }
     }
 
     // ── Init ──

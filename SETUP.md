@@ -31,7 +31,7 @@
 2. **Create API token** をクリック
 3. 設定：
    - **Token name**: `voice-recorder-upload`
-   - **Permissions**: **Object Read & Write**
+   - **Permissions**: **Object Read & Write**（一覧取得・再生・ダウンロードにも必要）
    - **Specify bucket(s)**: 手順1で作ったバケットのみに限定
    - **TTL**: 任意（無期限でもOK、個人利用なので）
 4. **Create API Token** をクリック
